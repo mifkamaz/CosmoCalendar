@@ -43,7 +43,7 @@ public class CircleAnimationTextView extends AppCompatTextView {
     private Paint backgroundRectanglePaint;
     private Rect backgroundRectangle;
 
-    public static final int DEFAULT_PADDING = 10;
+    public static final int DEFAULT_PADDING = 0;
     public static final int MAX_PROGRESS = 100;
     public static final long SELECTION_ANIMATION_DURATION = 300;
 

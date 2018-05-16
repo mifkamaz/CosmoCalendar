@@ -31,13 +31,15 @@ public class MultipleSelectionManager extends BaseCriteriaSelectionManager {
     }
 
     @Override
-    public void toggleDay(@NonNull Day day) {
+    public void toggleDay(@NonNull Day day, boolean notify) {
         if (days.contains(day)) {
             days.remove(day);
         } else {
             days.add(day);
         }
-        onDaySelectedListener.onDaySelected();
+        if (notify) {
+            onDaySelectedListener.onDaySelected();
+        }
     }
 
     @Override

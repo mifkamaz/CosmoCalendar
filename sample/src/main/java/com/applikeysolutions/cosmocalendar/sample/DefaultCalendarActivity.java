@@ -1,15 +1,15 @@
 package com.applikeysolutions.cosmocalendar.sample;
 
+import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.IdRes;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.Toolbar;
+import android.util.ArraySet;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.RadioGroup;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.applikeysolutions.cosmocalendar.selection.MultipleSelectionManager;
@@ -18,14 +18,15 @@ import com.applikeysolutions.cosmocalendar.selection.criteria.WeekDayCriteria;
 import com.applikeysolutions.cosmocalendar.selection.criteria.month.CurrentMonthCriteria;
 import com.applikeysolutions.cosmocalendar.selection.criteria.month.NextMonthCriteria;
 import com.applikeysolutions.cosmocalendar.selection.criteria.month.PreviousMonthCriteria;
-import com.applikeysolutions.cosmocalendar.utils.SelectionType;
 import com.applikeysolutions.cosmocalendar.view.CalendarView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-public class DefaultCalendarActivity extends AppCompatActivity implements RadioGroup.OnCheckedChangeListener {
+public class DefaultCalendarActivity extends AppCompatActivity {
 
     private CalendarView calendarView;
 
@@ -51,8 +52,115 @@ public class DefaultCalendarActivity extends AppCompatActivity implements RadioG
 
     private void initViews() {
         calendarView = (CalendarView) findViewById(R.id.calendar_view);
-        ((RadioGroup) findViewById(R.id.rg_orientation)).setOnCheckedChangeListener(this);
-        ((RadioGroup) findViewById(R.id.rg_selection_type)).setOnCheckedChangeListener(this);
+
+        calendarView.setSelectedDayBackgroundStartColor(Color.RED);
+        calendarView.setSelectionBarMonthTextColor(Color.RED);
+
+        final Calendar calendar = Calendar.getInstance();
+        Set<Long> disabledDays = new ArraySet<>();
+
+        calendar.add(Calendar.DAY_OF_YEAR, 3);
+        disabledDays.add(calendar.getTimeInMillis());
+
+        calendar.add(Calendar.DAY_OF_YEAR, 3);
+        disabledDays.add(calendar.getTimeInMillis());
+
+        calendar.add(Calendar.DAY_OF_YEAR, 3);
+        disabledDays.add(calendar.getTimeInMillis());
+
+        calendar.add(Calendar.DAY_OF_YEAR, 3);
+        disabledDays.add(calendar.getTimeInMillis());
+
+        calendar.add(Calendar.DAY_OF_YEAR, 3);
+        disabledDays.add(calendar.getTimeInMillis());
+
+//        calendarView.setDisabledDays(disabledDays);
+
+        calendarView.setWeekendDays(new HashSet() {{
+            add(Calendar.SATURDAY);
+            add(Calendar.SUNDAY);
+        }});
+
+//        calendar.add(Calendar.DAY_OF_YEAR, 3);
+//        calendarView.toggleDay(calendar);
+//        calendar.add(Calendar.DAY_OF_YEAR, 3);
+//        calendarView.toggleDay(calendar);
+
+        calendarView.setCurrentDayIconRes(R.drawable.bg_empty);
+        calendarView.setCurrentDaySelectedIconRes(R.drawable.bg_empty);
+
+        calendarView.setShowDaysOfWeek(false);
+        calendarView.setShowDaysOfWeekTitle(false);
+
+
+//        calendarView.setOnDaySelectedListener(
+//                new CalendarView.OnDaySelectedListener() {
+//                    @Override
+//                    public void onDaySelected(List<Day> selectedDays) {
+//                        Calendar calendar1 = Calendar.getInstance();
+//                        calendar1.setTime(selectedDays.get(0).getCalendar().getTime());
+//
+//                        calendar1.add(Calendar.DAY_OF_YEAR, 7);
+//
+//                        calendarView.clearSelections();
+//                        calendarView.toggleDay(selectedDays.get(0).getCalendar());
+//                        calendarView.toggleDay(calendar1);
+//                    }
+//                }
+//        );
+
+//        Timer timer = new Timer();
+//        timer.schedule(new TimerTask() {
+//            int days = 4;
+//
+//            @Override
+//            public void run() {
+//                final Calendar start = Calendar.getInstance();
+//                final Calendar end = Calendar.getInstance();
+//                end.add(Calendar.DAY_OF_YEAR, days);
+//
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        calendarView.clearSelections();
+//                        calendarView.toggleDay(start);
+//                        calendarView.toggleDay(end);
+//                    }
+//                });
+//
+//                days++;
+//
+//                if (days > 20) {
+//                    days = 4;
+//                }
+//            }
+//        }, 1000, 250);
+
+        SeekBar seekBar = (SeekBar) findViewById(R.id.seek_bar);
+        seekBar.setMax(16);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                final Calendar start = Calendar.getInstance();
+                final Calendar end = Calendar.getInstance();
+
+                end.add(Calendar.DAY_OF_YEAR, i + 4);
+
+                calendarView.clearSelections();
+                calendarView.toggleDay(start);
+                calendarView.toggleDay(end);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
     }
 
     private void createCriterias() {
@@ -159,44 +267,6 @@ public class DefaultCalendarActivity extends AppCompatActivity implements RadioG
 
     private void logSelectedDaysMenuClick() {
         Toast.makeText(this, "Selected " + calendarView.getSelectedDays().size(), Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
-        clearSelectionsMenuClick();
-        switch (checkedId) {
-            case R.id.rb_horizontal:
-                calendarView.setCalendarOrientation(OrientationHelper.HORIZONTAL);
-                break;
-
-            case R.id.rb_vertical:
-                calendarView.setCalendarOrientation(OrientationHelper.VERTICAL);
-                break;
-
-            case R.id.rb_single:
-                calendarView.setSelectionType(SelectionType.SINGLE);
-                menuFridays.setVisible(false);
-                menuThreeMonth.setVisible(false);
-                break;
-
-            case R.id.rb_multiple:
-                calendarView.setSelectionType(SelectionType.MULTIPLE);
-                menuFridays.setVisible(true);
-                menuThreeMonth.setVisible(true);
-                break;
-
-            case R.id.rb_range:
-                calendarView.setSelectionType(SelectionType.RANGE);
-                menuFridays.setVisible(false);
-                menuThreeMonth.setVisible(false);
-                break;
-
-            case R.id.rb_none:
-                calendarView.setSelectionType(SelectionType.NONE);
-                menuFridays.setVisible(false);
-                menuThreeMonth.setVisible(false);
-                break;
-        }
     }
 }
 

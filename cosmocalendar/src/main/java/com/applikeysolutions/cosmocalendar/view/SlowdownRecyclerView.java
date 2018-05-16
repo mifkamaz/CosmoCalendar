@@ -39,8 +39,8 @@ public class SlowdownRecyclerView extends RecyclerView {
         };
     }
 
-    @Override
-    public void smoothScrollBy(int dx, int dy) {
-        super.smoothScrollBy(dx, dy, interpolator);
-    }
+//    @Override
+//    public void smoothScrollBy(int dx, int dy) {
+//        super.smoothScrollBy(dx, dy, interpolator);
+//    }
 }

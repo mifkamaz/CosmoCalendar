@@ -8,6 +8,8 @@ import com.applikeysolutions.cosmocalendar.model.Day;
 import java.util.Calendar;
 import java.util.Date;
 
+import static java.util.Calendar.MONTH;
+
 public class DateUtils {
 
     public static Calendar getCalendar(Date date) {
@@ -96,8 +98,15 @@ public class DateUtils {
         calendarEnd.setTime(dayEnd.getCalendar().getTime());
         setCalendarToEndOfDay(calendarEnd);
 
-        return day.getCalendar().getTimeInMillis() >= calendarStart.getTimeInMillis()
-                && day.getCalendar().getTimeInMillis() <= calendarEnd.getTimeInMillis();
+        if (day.isBelongToMonth()) {
+            return day.getCalendar().getTimeInMillis() >= calendarStart.getTimeInMillis()
+                    && day.getCalendar().getTimeInMillis() <= calendarEnd.getTimeInMillis();
+        } else {
+            int currentMonth = day.getCalendar().get(MONTH);
+            int startMonth = calendarStart.get(MONTH);
+            int endMonth = calendarEnd.get(MONTH);
+            return currentMonth >= startMonth && currentMonth <= endMonth;
+        }
     }
 
     private static void setCalendarToStartOfDay(Calendar calendar) {

@@ -35,7 +35,7 @@ public class DayDelegate extends BaseDelegate {
             @Override
             public void onClick(View v) {
                 if (!day.isDisabled()) {
-                    selectionManager.toggleDay(day);
+                    selectionManager.toggleDay(day, true);
                     if (selectionManager instanceof MultipleSelectionManager) {
                         daysAdapter.notifyItemChanged(position);
                     } else {

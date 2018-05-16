@@ -13,9 +13,11 @@ public class SingleSelectionManager extends BaseSelectionManager {
     }
 
     @Override
-    public void toggleDay(@NonNull Day day) {
+    public void toggleDay(@NonNull Day day, boolean notify) {
         this.day = day;
-        onDaySelectedListener.onDaySelected();
+        if (notify) {
+            onDaySelectedListener.onDaySelected();
+        }
     }
 
     @Override

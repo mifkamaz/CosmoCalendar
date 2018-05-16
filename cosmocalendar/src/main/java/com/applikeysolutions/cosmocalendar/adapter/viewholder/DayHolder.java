@@ -1,22 +1,23 @@
 package com.applikeysolutions.cosmocalendar.adapter.viewholder;
 
-import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.PaintDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
+import android.graphics.drawable.shapes.RoundRectShape;
 import android.view.View;
 
-import com.applikeysolutions.cosmocalendar.settings.appearance.ConnectedDayIconPosition;
-import com.applikeysolutions.cosmocalendar.utils.CalendarUtils;
-import com.applikeysolutions.customizablecalendar.R;
 import com.applikeysolutions.cosmocalendar.model.Day;
 import com.applikeysolutions.cosmocalendar.selection.BaseSelectionManager;
 import com.applikeysolutions.cosmocalendar.selection.RangeSelectionManager;
 import com.applikeysolutions.cosmocalendar.selection.SelectionState;
 import com.applikeysolutions.cosmocalendar.view.CalendarView;
 import com.applikeysolutions.cosmocalendar.view.customviews.CircleAnimationTextView;
+import com.applikeysolutions.customizablecalendar.R;
 
 public class DayHolder extends BaseDayHolder {
-
-    private CircleAnimationTextView ctvDay;
-    private BaseSelectionManager selectionManager;
 
     public DayHolder(View itemView, CalendarView calendarView) {
         super(itemView, calendarView);
@@ -28,158 +29,86 @@ public class DayHolder extends BaseDayHolder {
         ctvDay.setText(String.valueOf(day.getDayNumber()));
 
         boolean isSelected = selectionManager.isDaySelected(day);
-        if (isSelected && !day.isDisabled()) {
-            select(day);
+        if (isSelected) {
+            ctvDay.setBackgroundColor(calendarView.getSelectedDayBackgroundColor());
+            SelectionState state;
+            if (selectionManager instanceof RangeSelectionManager) {
+                state = ((RangeSelectionManager) selectionManager).getSelectedState(day);
+            } else {
+                state = SelectionState.SINGLE_DAY;
+            }
+            select2(state);
         } else {
-            unselect(day);
+            select2(null);
+            if (day.isDisabled()) {
+                ctvDay.setTextColor(calendarView.getDisabledDayTextColor());
+            }
         }
 
         if (day.isCurrent()) {
             addCurrentDayIcon(isSelected);
         }
-
-        if(day.isDisabled()){
-            ctvDay.setTextColor(calendarView.getDisabledDayTextColor());
-        }
     }
 
-    private void addCurrentDayIcon(boolean isSelected){
-        ctvDay.setCompoundDrawablePadding(getPadding(getCurrentDayIconHeight(isSelected)) * -1);
-        ctvDay.setCompoundDrawablesWithIntrinsicBounds(0, isSelected
-                ? calendarView.getCurrentDaySelectedIconRes()
-                : calendarView.getCurrentDayIconRes(), 0, 0);
-    }
 
-    private int getCurrentDayIconHeight(boolean isSelected){
-        if (isSelected) {
-            return CalendarUtils.getIconHeight(calendarView.getContext().getResources(), calendarView.getCurrentDaySelectedIconRes());
-        } else {
-            return CalendarUtils.getIconHeight(calendarView.getContext().getResources(), calendarView.getCurrentDayIconRes());
+    private void select2(SelectionState state) {
+        if (state == null) {
+            ctvDay.setBackgroundColor(Color.TRANSPARENT);
+            return;
         }
-    }
-
-    private int getConnectedDayIconHeight(boolean isSelected){
-        if (isSelected) {
-            return CalendarUtils.getIconHeight(calendarView.getContext().getResources(), calendarView.getConnectedDaySelectedIconRes());
-        } else {
-            return CalendarUtils.getIconHeight(calendarView.getContext().getResources(), calendarView.getConnectedDayIconRes());
-        }
-    }
-
-    private void select(Day day) {
-        if (day.isFromConnectedCalendar()) {
-            if(day.isDisabled()){
-                ctvDay.setTextColor(day.getConnectedDaysDisabledTextColor());
-            } else {
-                ctvDay.setTextColor(day.getConnectedDaysSelectedTextColor());
-            }
-            addConnectedDayIcon(true);
-        } else {
-            ctvDay.setTextColor(calendarView.getSelectedDayTextColor());
-            ctvDay.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-        }
-
-        SelectionState state;
-        if (selectionManager instanceof RangeSelectionManager) {
-            state = ((RangeSelectionManager) selectionManager).getSelectedState(day);
-        } else {
-            state = SelectionState.SINGLE_DAY;
-        }
-        animateDay(state, day);
-    }
-
-    private void addConnectedDayIcon(boolean isSelected){
-        ctvDay.setCompoundDrawablePadding(getPadding(getConnectedDayIconHeight(isSelected)) * -1);
-
-        switch (calendarView.getConnectedDayIconPosition()){
-            case ConnectedDayIconPosition.TOP:
-                ctvDay.setCompoundDrawablesWithIntrinsicBounds(0, isSelected
-                        ? calendarView.getConnectedDaySelectedIconRes()
-                        : calendarView.getConnectedDayIconRes(), 0, 0);
+        switch (state) {
+            case START_RANGE_DAY_WITHOUT_END:
                 break;
-
-            case ConnectedDayIconPosition.BOTTOM:
-                ctvDay.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, isSelected
-                        ? calendarView.getConnectedDaySelectedIconRes()
-                        : calendarView.getConnectedDayIconRes());
+            case START_RANGE_DAY:
+                ctvDay.setBackgroundDrawable(drawRectangle());
+                break;
+            case END_RANGE_DAY:
+                ctvDay.setBackgroundDrawable(drawRectangle2());
+                break;
+            case RANGE_DAY:
+                ctvDay.setBackgroundColor(calendarView.getSelectedDayBackgroundColor());
+                break;
+            case SINGLE_DAY:
+//                ctvDay.setBackgroundColor(calendarView.getSelectedDayBackgroundStartColor());
                 break;
         }
+
     }
 
-    private void animateDay(SelectionState state, Day day) {
-        if (day.getSelectionState() != state) {
-            if (day.isSelectionCircleDrawed() && state == SelectionState.SINGLE_DAY) {
-                ctvDay.showAsSingleCircle(calendarView);
-            } else if (day.isSelectionCircleDrawed() && state == SelectionState.START_RANGE_DAY) {
-                ctvDay.showAsStartCircle(calendarView, false);
-            } else if (day.isSelectionCircleDrawed() && state == SelectionState.END_RANGE_DAY) {
-                ctvDay.showAsEndCircle(calendarView, false);
-            } else {
-                ctvDay.setSelectionStateAndAnimate(state, calendarView, day);
-            }
-        } else {
-            switch (state) {
-                case SINGLE_DAY:
-                    if (day.isSelectionCircleDrawed()) {
-                        ctvDay.showAsSingleCircle(calendarView);
-                    } else {
-                        ctvDay.setSelectionStateAndAnimate(state, calendarView, day);
-                    }
-                    break;
+    private Drawable drawRectangle() {
 
-                case RANGE_DAY:
-                    ctvDay.setSelectionStateAndAnimate(state, calendarView, day);
-                    break;
+        ShapeDrawable round = new ShapeDrawable();
+        round.setShape(new OvalShape());
+        round.getPaint().setColor(calendarView.getSelectedDayBackgroundStartColor());
 
-                case START_RANGE_DAY_WITHOUT_END:
-                    if (day.isSelectionCircleDrawed()) {
-                        ctvDay.showAsStartCircleWithouEnd(calendarView, false);
-                    } else {
-                        ctvDay.setSelectionStateAndAnimate(state, calendarView, day);
-                    }
-                    break;
+        PaintDrawable rectangle = new PaintDrawable();
+        rectangle.setShape(
+                new RoundRectShape(
+                        new float[]{1000f,1000f, 0, 0, 0, 0, 1000f,1000f},
+                        null,
+                        null
+                )
+        );
+        rectangle.getPaint().setColor(calendarView.getSelectedDayBackgroundColor());
 
-                case START_RANGE_DAY:
-                    if (day.isSelectionCircleDrawed()) {
-                        ctvDay.showAsStartCircle(calendarView, false);
-                    } else {
-                        ctvDay.setSelectionStateAndAnimate(state, calendarView, day);
-                    }
-                    break;
-
-                case END_RANGE_DAY:
-                    if (day.isSelectionCircleDrawed()) {
-                        ctvDay.showAsEndCircle(calendarView, false);
-                    } else {
-                        ctvDay.setSelectionStateAndAnimate(state, calendarView, day);
-                    }
-                    break;
-            }
-        }
+        return new LayerDrawable(new Drawable[]{
+                rectangle, round
+        });
     }
 
-    private void unselect(Day day) {
-        int textColor;
-        if (day.isFromConnectedCalendar()) {
-            if(day.isDisabled()){
-                textColor = day.getConnectedDaysDisabledTextColor();
-            } else {
-                textColor = day.getConnectedDaysTextColor();
-            }
-            addConnectedDayIcon(false);
-        } else if (day.isWeekend()) {
-            textColor = calendarView.getWeekendDayTextColor();
-            ctvDay.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-        } else {
-            textColor = calendarView.getDayTextColor();
-            ctvDay.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-        }
-        day.setSelectionCircleDrawed(false);
-        ctvDay.setTextColor(textColor);
-        ctvDay.clearView();
+    private Drawable drawRectangle2() {
+
+        PaintDrawable rectangle = new PaintDrawable();
+        rectangle.setShape(
+                new RoundRectShape(
+                        new float[]{ 0, 0,1000f,1000f, 1000f,1000f, 0, 0},
+                        null,
+                        null
+                )
+        );
+        rectangle.getPaint().setColor(calendarView.getSelectedDayBackgroundColor());
+
+        return rectangle;
     }
 
-    private int getPadding(int iconHeight){
-        return (int) (iconHeight * Resources.getSystem().getDisplayMetrics().density);
-    }
 }

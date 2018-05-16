@@ -6,6 +6,8 @@ import android.support.v4.util.Pair;
 import com.applikeysolutions.cosmocalendar.model.Day;
 import com.applikeysolutions.cosmocalendar.utils.DateUtils;
 
+import java.util.Calendar;
+
 public class RangeSelectionManager extends BaseSelectionManager {
 
     private Pair<Day, Day> days;
@@ -20,7 +22,7 @@ public class RangeSelectionManager extends BaseSelectionManager {
     }
 
     @Override
-    public void toggleDay(@NonNull Day day) {
+    public void toggleDay(@NonNull Day day, boolean notify) {
         if (days == null && tempDay == null || tempDay == null) {
             tempDay = day;
             days = null;
@@ -35,12 +37,23 @@ public class RangeSelectionManager extends BaseSelectionManager {
             }
             tempDay = null;
         }
-        onDaySelectedListener.onDaySelected();
+        if (notify) {
+            onDaySelectedListener.onDaySelected();
+        }
     }
 
     @Override
     public boolean isDaySelected(@NonNull Day day) {
         return isDaySelectedManually(day);
+    }
+
+    @Override
+    public boolean isMonthInRange(Day firstDayInMonth) {
+        if (days == null || days.first == null || days.second == null) {
+            return false;
+        }
+        return days.first.getCalendar().get(Calendar.MONTH) == firstDayInMonth.getCalendar().get(Calendar.MONTH) ||
+                days.second.getCalendar().get(Calendar.MONTH) == firstDayInMonth.getCalendar().get(Calendar.MONTH);
     }
 
     private boolean isDaySelectedManually(@NonNull Day day) {
@@ -62,6 +75,10 @@ public class RangeSelectionManager extends BaseSelectionManager {
     public SelectionState getSelectedState(Day day) {
         if (!isDaySelectedManually(day)) {
             return SelectionState.SINGLE_DAY;
+        }
+
+        if (!day.isBelongToMonth()) {
+            return SelectionState.RANGE_DAY;
         }
 
         if (days == null) {

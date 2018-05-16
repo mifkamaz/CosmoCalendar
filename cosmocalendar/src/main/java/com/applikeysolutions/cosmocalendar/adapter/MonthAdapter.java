@@ -82,6 +82,8 @@ public class MonthAdapter extends RecyclerView.Adapter<MonthHolder> {
         return months.get(position).getFirstDay().getCalendar().getTimeInMillis();
     }
 
+
+
     public List<Month> getData() {
         return months;
     }

@@ -1,5 +1,6 @@
 package com.applikeysolutions.cosmocalendar.view.delegate;
 
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +23,7 @@ public class OtherDayDelegate {
         return new OtherDayHolder(view, calendarView);
     }
 
-    public void onBindDayHolder(Day day, OtherDayHolder holder, int position) {
-        holder.bind(day);
+    public void onBindDayHolder(Day firstDayInMonth, Day day, OtherDayHolder holder, int position) {
+        holder.bind(firstDayInMonth, day, calendarView.getSelectionManager());
     }
 }

@@ -11,7 +11,7 @@ import com.applikeysolutions.cosmocalendar.model.Day;
 public class NoneSelectionManager extends BaseSelectionManager {
 
     @Override
-    public void toggleDay(@NonNull Day day) {
+    public void toggleDay(@NonNull Day day, boolean notify) {
 
     }
 
